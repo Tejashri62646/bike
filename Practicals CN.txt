@@ -1,0 +1,1071 @@
+PARITY CHECK VRC
+
+#include<iostream>
+#include<string>
+using namespace std;
+
+int main(){
+	string data, received_data ;
+	int ct = 0;
+	cout << "Sender:- "<< endl;
+	cout << "Enter Data: ";
+	cin >> data;
+	for (int i=0; i < data.length(); i++){
+		if(data[i] == '1'){
+			ct++ ;
+		}
+	}
+	if(ct % 2 == 0){
+		data += "0";
+	}else{
+		data += "1";
+	}
+
+	cout << "Data sent by sender: " << data << endl;
+
+	
+	cout << "\nReceiver:- " <<endl;
+	cout << "Data received by Receiver : ";
+	cin >> received_data;
+	int count = 0;
+
+for (int i = 0; i < received_data.length(); i++)
+{
+    if (received_data[i] == '1')
+    {
+        count++;
+    }
+}
+
+if (count % 2 == 0)
+{
+    cout << "Data Received is valid.\n";
+}
+else
+{
+    cout << "Data Received is invalid.\n";
+}
+
+return 0;
+}
+
+
+PARITY CHECK CRC
+
+#include<iostream>
+#include<string>
+using namespace std;
+
+int main(){
+	string data, div, rem;
+	cout << " --Sender Side-- \n";
+	cout << "Enter Data : " ;
+	cin >> data;
+	cout << "Enter Generator : ";
+	cin >> div;
+	
+	int dlen = div.length();
+	 rem = data;
+	
+	for(int i=0; i < dlen-1; i++){
+		rem += '0';
+	}	
+	cout << "Appended Data: " << rem << endl;
+	
+	//Modulo Division (XOR)
+	for(int i= 0; i < (rem.length() - dlen); i++){
+		if(rem[i] == '1'){
+			for(int j=0 ; j < dlen; j++){
+				if( rem[i+j] == div[j]){
+					rem[i+j] = '0';
+				}else{
+					rem[i+j] = '1';
+				}
+			}
+		}
+	}
+	
+	string crc = rem.substr(rem.length() - dlen + 1);
+	
+	cout << "Your Final CRC is: " << crc << endl;
+	cout << "Data Sent: " << data+crc << endl;
+	
+	// Receiver Side
+	string rec;
+	cout << " --Receiver Side-- \n";
+	cout << "Enter Received Data: " << endl;
+	cin >> rec;
+	for(int i= 0; i < (rec.length() - dlen); i++){
+		if(rec[i] == '1'){
+			for(int j=0 ; j < dlen; j++){
+				if( rec[i+j] == div[j]){
+					rec[i+j] = '0';
+				}else{
+					rec[i+j] = '1';
+				}
+			}
+		}
+	}
+	cout << "Remainder after Division :" << rec << endl;
+	
+	int err = 0;
+	for(int i =0; i < rec.length() ; i++){
+		if(rec[i] == '1'){
+			err = 1;
+			break;
+		}
+	}
+	
+	if(err == 0){
+		cout << "Data is valid ! (No Error)" << endl;
+	}else{
+		cout << "Data is Invalid ! (Error)" << endl;
+	}
+	return 0;
+	
+}
+
+HAMMING CODE
+
+#include <iostream>
+using namespace std;
+
+int main() {
+    int h[8] = {0};
+
+    cout << "Enter 4 data bits: ";
+    cin >> h[3] >> h[5] >> h[6] >> h[7];
+
+    h[1] = h[3] ^ h[5] ^ h[7];
+    h[2] = h[3] ^ h[6] ^ h[7];
+    h[4] = h[5] ^ h[6] ^ h[7];
+
+    cout << "Hamming Code: ";
+    for(int i = 1; i <= 7; i++)
+        cout << h[i];
+
+    cout << "\nEnter received 7 bits: ";
+    for(int i = 1; i <= 7; i++)
+        cin >> h[i];
+
+    int p1 = h[1] ^ h[3] ^ h[5] ^ h[7];
+    int p2 = h[2] ^ h[3] ^ h[6] ^ h[7];
+    int p4 = h[4] ^ h[5] ^ h[6] ^ h[7];
+
+    int error = p1 + 2 * p2 + 4 * p4;
+
+    if(error == 0) {
+        cout << "No error detected." << endl;
+    }
+    else {
+        cout << "Error at position: " << error << endl;
+
+        h[error] = h[error] ^ 1;
+
+        cout << "Corrected Hamming Code: ";
+        for(int i = 1; i <= 7; i++)
+            cout << h[i];
+
+        cout << endl;
+    }
+
+    cout << "Original Data: ";
+    cout << h[3] << h[5] << h[6] << h[7] << endl;
+
+    return 0;
+}
+
+STOP AND WAIT 
+#include<iostream>
+#include<cstdlib>
+#include<ctime>
+using namespace std;
+
+void StopAndWait(){
+	int n;
+	cout<<"Enter the number of frames: ";
+	cin>>n;
+	if(n<=0){
+		cout<<"Invalid no. of frames"<<endl;
+		return;
+	}
+	
+	for(int i=1;i<=n;i++){
+		while(true){
+			cout<<"\nSending frame: "<<i<<endl;
+			if(rand()%5 ==0){
+				cout<<"frame "<<i<<" lost"<<endl;
+				cout<<"Timeout-> resending frame: "<<i<<endl;
+				continue;
+			}
+			cout<<"frame "<<i<<" received"<<endl;
+			
+			if(rand()%5==0){
+				cout<<"Ack of "<<i<<" lost"<<endl;
+				cout<<"Timeout-> resending frame: "<<i<<endl;
+				continue;
+			}
+			cout<<"Ack received of frame "<<i<<endl;
+			break;
+		}
+	}
+	cout<<"All frames are received  successfully!"<<endl;
+}
+
+int main(){
+	srand(time(0));
+	cout<<"******STOP AND WAIT******"<<endl;
+	StopAndWait();
+	return 0;
+}
+
+GO BACK N 
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+using namespace std;
+
+void GoBackN() {
+    int n, window;
+    cout << "Enter no. of frames: ";
+    cin >> n;
+    cout << "Enter window size: ";
+    cin >> window;
+
+    if (n <= 0 || window <= 0 || window > n) {
+        cout << "Invalid Input \n";
+        return;
+    }
+
+    int i = 0; 
+    while (i < n) {
+        cout << "\nSENDING WINDOW" << endl;
+        int end = i + window;
+        if (end > n) {
+            end = n;
+        }
+
+        bool error = false;
+        for (int j = i; j < end; j++) {
+            cout << "Sending frame " << j + 1 << endl;
+            if (rand() % 5 == 0) {
+                cout << "Frame " << j + 1 << " lost" << endl;
+                error = true;
+                i = j; 
+                break;
+            }
+            cout << "Frame " << j + 1 << " received" << endl;
+        }
+
+        if (error) {
+            cout << "Error occured. Go back and resend from frame: " << i + 1 << endl;
+            continue;
+        }
+
+        
+        cout << "\nACK received for frames " << i + 1 << " to " << end << endl;
+        i = end;
+    }
+
+    cout << "All frames are received successfully!" << endl;
+}
+
+int main() {
+    srand(time(0));
+    cout << "*********GO BACK N************" << endl;
+    GoBackN();
+    return 0;
+}
+
+SELECTIVE REPEAT
+
+#include<iostream>
+#include<cstdlib>
+#include<ctime>
+using namespace std;
+
+void selectiveRepeat(){
+	int n,window;
+	cout<<"Enter no. of frames: ";
+	cin>>n;
+	cout<<"Enter window size: ";
+	cin>>window;
+	
+	int start = 0;
+	bool received[100] = {false};
+	while(start<n){
+		int end = start +window;
+		if(end>n){
+			end = n;
+		}
+		cout<<"\nSENDING WINDOW\n";
+		for(int i=start;i<end;i++){
+			if(received[i]) continue;
+			cout<<"Sending frame "<<i<<endl;
+			if(rand()%5==0){
+				cout<<"Frame "<<i<<" lost\n";
+			}
+			else{
+				cout<<"Frame "<<i<<" received\n";
+				received[i] = true;
+			}
+		}
+		
+		for(int i=start;i<end;i++){
+			if(!received[i]){
+				cout<<"Retransmitting frame "<<i<<endl;
+				if(rand()%5==0){
+					cout<<"Frame "<<i<<" lost again\n";
+				}
+				else{
+					cout<<"Frame "<<i<<" received\n";
+					received[i] = true;
+				}
+			}
+		}
+		while(start<end && received[start]){
+			start++;
+		}
+	}
+	cout<<"All frames are received successfully!\n";
+}
+
+int main(){
+	srand(time(0));
+	cout<<"SELECTIVE REPEAT\n";
+	selectiveRepeat();
+	return 0;
+}
+
+
+SUBNET CALCULATOR 
+#include <iostream>
+#include <cmath>
+#include <string>
+using namespace std;
+
+// Convert IP address into integer
+unsigned int ipToInt(int a, int b, int c, int d)
+{
+    return ((unsigned int)a << 24) |
+           ((unsigned int)b << 16) |
+           ((unsigned int)c << 8) |
+           (unsigned int)d;
+}
+
+// Convert integer into IP address
+void intToIP(unsigned int ip)
+{
+    cout << ((ip >> 24) & 255) << "."
+         << ((ip >> 16) & 255) << "."
+         << ((ip >> 8) & 255) << "."
+         << (ip & 255);
+}
+
+int main()
+{
+    int a, b, c, d, cidr;
+
+    cout << "===== SUBNET CALCULATOR =====\n";
+
+    cout << "Enter IP Address (4 octets): ";
+    cin >> a >> b >> c >> d;
+
+    cout << "Enter CIDR Prefix (0-32): ";
+    cin >> cidr;
+
+    // Validate input
+    if (a < 0 || a > 255 || b < 0 || b > 255 ||
+        c < 0 || c > 255 || d < 0 || d > 255 ||
+        cidr < 0 || cidr > 32)
+    {
+        cout << "Invalid IP Address or CIDR Prefix!";
+        return 0;
+    }
+
+    // Convert IP to integer
+    unsigned int ip = ipToInt(a, b, c, d);
+
+    // Calculate subnet mask
+    unsigned int mask = (cidr == 0) ? 0 : (0xFFFFFFFFu << (32 - cidr));
+
+    // Calculate network address
+    unsigned int network = ip & mask;
+
+    // Calculate broadcast address
+    unsigned int broadcast = network | (~mask);
+
+    // Calculate wildcard mask
+    unsigned int wildcard = ~mask;
+
+    // Calculate total addresses
+    unsigned long long total = 1ULL << (32 - cidr);
+
+    // Calculate usable hosts
+    unsigned long long usable;
+
+    if (cidr <= 30)
+        usable = total - 2;
+    else if (cidr == 31)
+        usable = 2;
+    else
+        usable = 1;
+
+    cout << "\n===== SUBNET DETAILS =====\n";
+
+    cout << "IP Address       : ";
+    intToIP(ip);
+
+    cout << "\nSubnet Mask      : ";
+    intToIP(mask);
+
+    cout << "\nNetwork Address  : ";
+    intToIP(network);
+
+    cout << "\nBroadcast Address: ";
+    intToIP(broadcast);
+
+    cout << "\nWildcard Mask    : ";
+    intToIP(wildcard);
+
+    cout << "\nFirst Usable IP  : ";
+    if (cidr <= 30)
+        intToIP(network + 1);
+    else if (cidr == 31)
+        cout << "No conventional host range";
+    else
+        intToIP(network);
+
+    cout << "\nLast Usable IP   : ";
+    if (cidr <= 30)
+        intToIP(broadcast - 1);
+    else if (cidr == 31)
+        cout << "No conventional host range";
+    else
+        intToIP(broadcast);
+
+    cout << "\nTotal Addresses  : " << total;
+    cout << "\nUsable Hosts     : " << usable;
+
+    cout << "\n";
+
+    return 0;
+}
+
+DISTANCE ROUTING
+
+#include<iostream>
+using namespace std;
+
+#define INF 999
+
+int main()
+{
+	int cost[4][4] , dist[4][4] , nexthop[4][4];
+	int n;
+	
+	cout<<"Enter Number of Routers : ";
+	cin>>n;
+	
+	cout<<"Enter Cost Matrix : ";
+	for(int i=0;i<n;i++)
+	{
+		for(int j=0;j<n;j++)
+		{
+			cin>>cost[i][j];
+			
+			if(cost[i][j] == -1){
+				cost[i][j] = INF;
+			}
+			
+			dist[i][j] = cost[i][j];
+			
+			if(i==j){
+				nexthop[i][j] = i;
+			}
+			else if(cost[i][j] != INF){
+				nexthop[i][j] = j;
+			}
+			else{
+				nexthop[i][j] = -1;
+			}
+		}
+	}
+	
+	for(int k=0;k<n;k++)
+	{
+		for(int i=0;i<n;i++)
+		{
+			for(int j=0;j<n;j++)
+			{
+				if(dist[i][k] != INF && dist[k][j] != INF)
+				{
+					if(dist[i][k] + dist[k][j] < dist[i][j])
+					{
+						dist[i][j] = dist[i][k] + dist[k][j];
+						nexthop[i][j] = nexthop[i][k];
+					}
+				}
+			}
+		}
+	}
+	
+	for(int i=0;i<n;i++)
+	{
+		cout<<"\nRouter : "<<i+1<<endl;
+		cout<<"Destination\tDistance\tNextHop\n";
+		for(int j=0;j<n;j++)
+		{
+			cout<<j+1<<"\t\t";
+			if(dist[i][j] == INF)
+			{
+				cout<<"INF\t\t-\n";
+			}
+			else{
+				cout<<dist[i][j]<<"\t\t"<<nexthop[i][j]+1<<endl;
+			}
+		}
+	}
+	
+	return 0;
+}
+
+SAMPLE INPUT
+0  2  7
+2  0  1
+7  1  0
+
+LINK STATE ROUTING
+
+#include <iostream>
+using namespace std;
+
+#define INF 999
+
+int main()
+{
+    int n;
+    int cost[10][10];
+
+    cout << "Enter number of routers: ";
+    cin >> n;
+
+    cout << "\nEnter cost matrix (-1 for no connection):\n";
+
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            cin >> cost[i][j];
+
+            if (cost[i][j] == -1)
+                cost[i][j] = INF;
+        }
+    }
+
+    for (int src = 0; src < n; src++)
+    {
+        int dist[10], visited[10] = {0}, parent[10];
+
+        for (int i = 0; i < n; i++)
+        {
+            dist[i] = cost[src][i];
+            parent[i] = (cost[src][i] != INF && i != src) ? src : -1;
+        }
+
+        dist[src] = 0;
+
+        for (int count = 0; count < n - 1; count++)
+        {
+            int minDist = INF, u = -1;
+
+            for (int i = 0; i < n; i++)
+            {
+                if (!visited[i] && dist[i] < minDist)
+                {
+                    minDist = dist[i];
+                    u = i;
+                }
+            }
+
+            if (u == -1)
+                break;
+
+            visited[u] = 1;
+
+            for (int v = 0; v < n; v++)
+            {
+                if (!visited[v] && cost[u][v] != INF)
+                {
+                    if (dist[u] + cost[u][v] < dist[v])
+                    {
+                        dist[v] = dist[u] + cost[u][v];
+                        parent[v] = u;
+                    }
+                }
+            }
+        }
+
+        cout << "\nLink State Routing Table - Router "
+             << src + 1 << ":\n";
+
+        cout << "Destination\tCost\tNext Hop\n";
+
+        for (int dest = 0; dest < n; dest++)
+        {
+            cout << dest + 1 << "\t\t";
+
+            if (dist[dest] == INF)
+            {
+                cout << "INF\t-\n";
+            }
+            else
+            {
+                int next = dest;
+
+                if (dest != src)
+                {
+                    while (parent[next] != src && parent[next] != -1)
+                        next = parent[next];
+                }
+
+                cout << dist[dest] << "\t"
+                     << (dest == src ? src + 1 : next + 1)
+                     << endl;
+            }
+        }
+    }
+
+    return 0;
+}
+
+SAMPLE INPUT
+0  2  7
+2  0  1
+7  1  0
+
+TCP SERVER DEV CPP
+#include <iostream>
+#include <cstring>
+#include <winsock2.h> // Windows socket header instead of arpa/inet.h & unistd.h
+using namespace std;
+
+int main() {
+    WSADATA wsa;
+    // Step 1: Initialize Winsock library (required on Windows)
+    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
+        cout << "WSAStartup failed" << endl;
+        return 1;
+    }
+
+    SOCKET serversocket, clientsocket;
+    char buffer[1024] = {0};
+    struct sockaddr_in serverAddress;
+
+    // Step 2: Create TCP socket
+    serversocket = socket(AF_INET, SOCK_STREAM, 0);
+    if (serversocket == INVALID_SOCKET) {
+        cout << "socket creation failed" << endl;
+        WSACleanup();
+        return 1;
+    }
+
+    // Step 3: Configure server IP and port
+    serverAddress.sin_family = AF_INET;
+    serverAddress.sin_port = htons(8080);
+    serverAddress.sin_addr.s_addr = INADDR_ANY;
+
+    // Step 4: Bind socket to port 8080
+    if (bind(serversocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) == SOCKET_ERROR) {
+        cout << "bind failed" << endl;
+        closesocket(serversocket);
+        WSACleanup();
+        return 1;
+    }
+
+    // Step 5: Listen for incoming connections
+    listen(serversocket, 5);
+    cout << "server is waiting for client" << endl;
+
+    // Step 6: Accept a client connection
+    clientsocket = accept(serversocket, NULL, NULL);
+    if (clientsocket == INVALID_SOCKET) {
+        cout << "accept failed" << endl;
+        closesocket(serversocket);
+        WSACleanup();
+        return 1;
+    }
+
+    cout << "client connected successfully" << endl;
+
+    // Step 7: Receive message from client
+    int bytes = recv(clientsocket, buffer, sizeof(buffer) - 1, 0);
+    if (bytes > 0) {
+        buffer[bytes] = '\0';
+        cout << "message received: " << buffer << endl;
+    }
+
+    // Step 8: Send reply back to client
+    string reply = "hello client, message received";
+    send(clientsocket, reply.c_str(), reply.length(), 0);
+    cout << "message sent by the server" << endl;
+
+    // Step 9: Close sockets and clean up Winsock
+    closesocket(clientsocket);
+    closesocket(serversocket);
+    WSACleanup();
+
+    return 0;
+}
+
+TCP CLIENT DEV CPP
+
+#include <iostream>
+#include <cstring>
+#include <winsock2.h> // Replaces arpa/inet.h and unistd.h on Windows
+using namespace std;
+
+int main() {
+    WSADATA wsa;
+    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) { // Initialize Winsock
+        cout << "WSAStartup failed" << endl;
+        return 1;
+    }
+
+    SOCKET clientsocket;
+    char buffer[1024] = {0};
+    struct sockaddr_in serverAddress;
+
+    clientsocket = socket(AF_INET, SOCK_STREAM, 0);
+    if (clientsocket == INVALID_SOCKET) {
+        cout << "socket creation failed" << endl;
+        WSACleanup();
+        return 1;
+    }
+
+    serverAddress.sin_family = AF_INET;
+    serverAddress.sin_port = htons(8080);
+    serverAddress.sin_addr.s_addr = inet_addr("127.0.0.1"); // Loopback IP for Winsock
+
+    if (connect(clientsocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) == SOCKET_ERROR) {
+        cout << "connection failed" << endl;
+        closesocket(clientsocket);
+        WSACleanup();
+        return 1;
+    }
+    cout << "client connected to TCP server" << endl;
+
+    string msg = "hello server, this is tcp client\n";
+    send(clientsocket, msg.c_str(), msg.length(), 0);
+    cout << "msg sent to server" << endl;
+
+    int bytes = recv(clientsocket, buffer, sizeof(buffer) - 1, 0);
+    if (bytes > 0) {
+        buffer[bytes] = '\0';
+        cout << "server reply: " << buffer << endl;
+    }
+
+    closesocket(clientsocket);
+    WSACleanup();
+    return 0;
+}
+
+UDP SERVER DEV CPP
+#include <iostream>
+#include <cstring>
+#include <winsock2.h> // Replaces arpa/inet.h and unistd.h on Windows
+using namespace std;
+
+int main() {
+    WSADATA wsa;
+    // Step 1: Initialize Winsock library on Windows
+    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
+        cout << "WSAStartup failed" << endl;
+        return 1;
+    }
+
+    SOCKET serversocket;
+    char buffer[1024] = {0};
+    struct sockaddr_in serverAddress, clientAddress;
+    int clientlength = sizeof(clientAddress); // int instead of socklen_t for Winsock
+
+    // Step 2: Create UDP socket (SOCK_DGRAM)
+    serversocket = socket(AF_INET, SOCK_DGRAM, 0);
+    if (serversocket == INVALID_SOCKET) {
+        cout << "socket creation failed" << endl;
+        WSACleanup();
+        return 1;
+    }
+
+    // Step 3: Configure server address and port 8081
+    serverAddress.sin_family = AF_INET;
+    serverAddress.sin_port = htons(8081);
+    serverAddress.sin_addr.s_addr = INADDR_ANY;
+
+    // Step 4: Bind UDP socket to port 8081
+    if (bind(serversocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) == SOCKET_ERROR) {
+        cout << "bind failed" << endl;
+        closesocket(serversocket);
+        WSACleanup();
+        return 1;
+    }
+
+    cout << "server is waiting for client" << endl;
+
+    // Step 5: Receive datagram from client and capture clientAddress
+    int bytes = recvfrom(serversocket, buffer, sizeof(buffer) - 1, 0, (struct sockaddr *)&clientAddress, &clientlength);
+    if (bytes > 0) {
+        buffer[bytes] = '\0';
+        cout << "msg received: " << buffer << endl;
+    }
+
+    // Step 6: Send reply back to the client's address
+    string reply = "hello client, msg received";
+    sendto(serversocket, reply.c_str(), reply.length(), 0, (struct sockaddr *)&clientAddress, clientlength);
+    cout << "reply sent to client" << endl;
+
+    // Step 7: Close socket and clean up Winsock
+    closesocket(serversocket);
+    WSACleanup();
+    return 0;
+}
+
+UDP CLIENT DEV CPP
+
+#include <iostream>
+#include <cstring>
+#include <winsock2.h> // Replaces arpa/inet.h and unistd.h on Windows
+using namespace std;
+
+int main() {
+    WSADATA wsa;
+    // Initialize Winsock library on Windows
+    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
+        cout << "WSAStartup failed" << endl;
+        return 1;
+    }
+
+    SOCKET clientsocket;
+    char buffer[1024] = {0};
+    struct sockaddr_in serverAddress;
+    int serverlength = sizeof(serverAddress); // int instead of socklen_t for Winsock
+
+    // Create UDP socket (SOCK_DGRAM)
+    clientsocket = socket(AF_INET, SOCK_DGRAM, 0);
+    if (clientsocket == INVALID_SOCKET) {
+        cout << "socket creation failed" << endl;
+        WSACleanup();
+        return 1;
+    }
+
+    // Configure target UDP server address and port 8081
+    serverAddress.sin_family = AF_INET;
+    serverAddress.sin_port = htons(8081);
+    serverAddress.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+    // Send datagram message to server
+    string msg = "hello server,this is client";
+    sendto(clientsocket, msg.c_str(), msg.length(), 0, (struct sockaddr *)&serverAddress, serverlength);
+    cout << "msg sent to server" << endl;
+
+    // Receive reply datagram from server
+    int bytes = recvfrom(clientsocket, buffer, sizeof(buffer) - 1, 0, (struct sockaddr *)&serverAddress, &serverlength);
+    if (bytes > 0) {
+        buffer[bytes] = '\0';
+        cout << "reply from server: " << buffer << endl;
+    }
+
+    // Close socket and clean up Winsock
+    closesocket(clientsocket);
+    WSACleanup();
+    return 0;
+}
+
+TCP SERVER JAVA
+package vikrant;
+
+
+import java.io.*;
+import java.net.*;
+
+public class TCPServer {
+    public static void main(String[] args) {
+
+        int port = 9090;
+
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
+
+            System.out.println("[TCP Server] Listening on port " + port + "...");
+
+            Socket clientSocket = serverSocket.accept();
+
+            System.out.println("[TCP Server] Client connected.");
+
+            BufferedReader in = new BufferedReader(
+                new InputStreamReader(clientSocket.getInputStream())
+            );
+
+            String receivedMessage = in.readLine();
+
+            System.out.println("[TCP Server] Received: " + receivedMessage);
+
+            PrintWriter out = new PrintWriter(
+                clientSocket.getOutputStream(), true
+            );
+
+            out.println("ACK from TCP Java Server!");
+
+            System.out.println("[TCP Server] Reply sent.");
+
+            clientSocket.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+TCP CLIENT JAVA
+
+package vikrant;
+
+
+import java.io.*;
+import java.net.*;
+
+public class TCPClient {
+    public static void main(String[] args) {
+
+        String host = "127.0.0.1";
+        int port = 9090;
+
+        try (Socket socket = new Socket(host, port)) {
+
+            PrintWriter out = new PrintWriter(
+                socket.getOutputStream(), true
+            );
+
+            out.println("Hello TCP Java Server!");
+
+            System.out.println("[TCP Client] Message sent.");
+
+            BufferedReader in = new BufferedReader(
+                new InputStreamReader(socket.getInputStream())
+            );
+
+            String response = in.readLine();
+
+            System.out.println("[TCP Client] Received: " + response);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+UDP SERVER JAVA
+
+package vikrant;
+
+import java.net.*;
+
+public class UDPServer {
+    public static void main(String[] args) {
+
+        int port = 8081;
+
+        try (DatagramSocket serverSocket = new DatagramSocket(port)) {
+
+            System.out.println("[UDP Server] Listening on port " + port + "...");
+
+            byte[] receiveBuffer = new byte[1024];
+
+            DatagramPacket receivePacket =
+                new DatagramPacket(receiveBuffer, receiveBuffer.length);
+
+            serverSocket.receive(receivePacket);
+
+            String receivedMessage = new String(
+                receivePacket.getData(),
+                0,
+                receivePacket.getLength()
+            );
+
+            System.out.println("[UDP Server] Received: " + receivedMessage);
+
+            String reply = "ACK from UDP Java Server!";
+
+            byte[] sendBuffer = reply.getBytes();
+
+            InetAddress clientAddress = receivePacket.getAddress();
+            int clientPort = receivePacket.getPort();
+
+            DatagramPacket sendPacket = new DatagramPacket(
+                sendBuffer,
+                sendBuffer.length,
+                clientAddress,
+                clientPort
+            );
+
+            serverSocket.send(sendPacket);
+
+            System.out.println("[UDP Server] Reply sent.");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+UDP CLIENT JAVA
+
+package vikrant;
+
+import java.net.*;
+
+public class UDPClient {
+    public static void main(String[] args) {
+
+        String host = "127.0.0.1";
+        int port = 8081;
+
+        try (DatagramSocket clientSocket = new DatagramSocket()) {
+
+            InetAddress serverAddress = InetAddress.getByName(host);
+
+            String message = "Hello UDP Java Server!";
+
+            byte[] sendBuffer = message.getBytes();
+
+            DatagramPacket sendPacket = new DatagramPacket(
+                sendBuffer,
+                sendBuffer.length,
+                serverAddress,
+                port
+            );
+
+            clientSocket.send(sendPacket);
+
+            System.out.println("[UDP Client] Message sent.");
+
+            byte[] receiveBuffer = new byte[1024];
+
+            DatagramPacket receivePacket =
+                new DatagramPacket(receiveBuffer, receiveBuffer.length);
+
+            clientSocket.receive(receivePacket);
+
+            String response = new String(
+                receivePacket.getData(),
+                0,
+                receivePacket.getLength()
+            );
+
+            System.out.println("[UDP Client] Received: " + response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
